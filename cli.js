@@ -15,9 +15,10 @@ async function run() {
   // get the README
   const { data: readme } = await octokit.request(
     "GET /repos/{owner}/{repo}/contents/{path}",
+    // https://github.com/repos/javij98/octokit-training/contents/README.md
     {
       owner: "javij98",
-      repo: "-TrabajoApps",
+      repo: "octokit-training",
       path: "README.md"
     }
   );
