@@ -8,14 +8,14 @@ const octokit = new Octokit({
 
 async function run() {
   console.log(process.env.GITHUB_TOKEN);
-  const user = await octokit.request('GET /user');
+  const { data: user } = await octokit.request('GET /user');
 
-  console.log(`Authenticated as ${user.data.login}`);
+  console.log(`Authenticated as ${user.login}`);
 
   // get the README
   const { data: readme } = await octokit.request(
     "GET /repos/{owner}/{repo}/contents/{path}",
-    // https://github.com/repos/javij98/octokit-training/contents/README.md
+    // https://api.github.com/repos/javij98/octokit-training/contents/README.md
     {
       owner: "javij98",
       repo: "octokit-training",
@@ -23,20 +23,31 @@ async function run() {
     }
   );
 
-  console.log(readme.sha);
+  const readmeContent = Buffer.from(readme.content, 'base64').toString();
+  console.log(readmeContent);
+  const updated = bumpBoopCounter(readmeContent);
 
-  // const response = await octokit.request(
-  //     "GET /repos/{owner}/{repo}/content/{path}",
-  //     {
-  //         owner: "javij98",
-  //         repo: "-TrabajoApps",
-  //         //per_page: 2
-  //         path: 'README.md',
-  //         mesage: 'lala',
-  //         content: 'lalala lalala'
-  //     });
+  console.log(updated);
 
-  // console.dir(response.data);
+  const response = await octokit.request(
+    "PUT /repos/{owner}/{repo}/content/{path}",
+    {
+      owner: "javij98",
+      repo: "octokit-training",
+      path: 'README.md',
+      message: 'Trying to change a file with GitHub API',
+      content: Buffer.from(updated, 'utf8').toString('base64'),
+      sha: readme.sha
+    });
+
+  console.dir(response.data);
+}
+
+function bumpBoopCounter(content) {
+  return content.replace(
+    'learning',
+    (_content, counter) => 'learninggg'
+  );
 }
 
 run();
